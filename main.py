@@ -1,6 +1,6 @@
 # tester notre code par le terminal 
-from classes.blockchain import Blockchain
+from blockchain import Blockchain
 
-    blockchain = Blockchain('coucou', None)
+test = Blockchain('coucou', None)
 
-    print(blockchain)
+print(test)
