@@ -1,12 +1,12 @@
 from datetime import datetime;
 
 class Block:
-    def __init__(self, hash, data, previous_hash, nounce, index):
+    def __init__(self, hash, data, previous_hash, nonce, index, timestamp):
         self.hash = hash
         self.data = data
         self.previous_hash = previous_hash
-        self.nounce = nounce
-        self.timestamp = datetime.timestamp(now)
+        self.nonce = nonce
+        self.timestamp = timestamp
         self.index = index
 
 
@@ -28,17 +28,20 @@ class Block:
     def set_previous_hash(self, previous_hash):
         self.previous_hash = previous_hash
 
-    def get_nounce(nounce):
-        return self.nounce
+    def get_nonce(nonce):
+        return self.nonce
     
-    def set_nounce(self, nounce):
-        self.nounce = nounce
+    def set_nonce(self, nonce):
+        self.nounce = nonce
 
     def get_index(self):
         return self.index
 
     def get_timestamp(self):
         return self.timestamp
+
+    def set_timestamp(timestamp):
+        self.timestamp = timestamp
 
     # def set_index(self, index):
     #     self.index = index
