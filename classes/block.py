@@ -1,5 +1,3 @@
-from datetime import datetime;
-
 class Block:
     def __init__(self, hash, data, previous_hash, nonce, index, timestamp):
         self.hash = hash

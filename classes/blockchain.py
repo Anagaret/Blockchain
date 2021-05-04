@@ -1,33 +1,33 @@
-from block import Block
+from .block import Block
 import hashlib
+from datetime import datetime;
+import re
+
 
 class Blockchain:
+
+       
+
     def __init__(self, data, previous_block):
         if(previous_block is None):
             index = 0
             previous_hash = None
-        previous_hash = previous_block.hash
-        index = previous_block.index + 1 
-        timestamp = datetime.timestamp(now)
+        else: 
+            previous_hash = previous_block.hash
+            index = previous_block.index + 1 
+        timestamp = datetime.timestamp(datetime.now())
 
-        # obj_hash = create_hash_and_nonce({'index': index, 'previous_hash': previous_hash, "timestamp"})
-
-        self.block = Block(hash, data, previous_hash, nounce, index)
-
-
-    def create_hash_and_nonce(bloc):
         i = 0
-        expectedZero = 3
+        expectedZero = 1
         nonce = 1
-        hash = hashlib.new("sh256", data)
-        while (i < expectedZero):
-            if (hash[i] == 0):
-                i+=1
-            else:
+        hash = hashlib.sha256(str({ 'index': index, 'timestamp': timestamp, 'nonce': nonce, 'previous_hash': previous_hash, 'data': data}).encode('utf-8')).hexdigest()
+        while not re.search(r"^[0]{4}", hash):
                 nonce +=1
-                i = 0
-                hash = hashlib.new("sh256", data)
-        return  {'nonce' : nonce, 'hash': hash}
+                hash = hashlib.sha256(str({ 'index': index, 'timestamp': timestamp, 'nonce': nonce, 'previous_hash': previous_hash, 'data': data}).encode('utf-8')).hexdigest()
+        print(hash)
+        self.block = Block(hash, data, previous_hash, nonce, index, timestamp)
+
+
             
 
 
