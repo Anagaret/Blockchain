@@ -1,6 +1,6 @@
 # tester notre code par le terminal 
 from classes.blockchain import Blockchain
 
-test = Blockchain('coucou', None)
+block1 = Blockchain('coucou', None)
+block2 = Blockchain('salut', block1.block)
 
-# print(str(test.block.hash))
