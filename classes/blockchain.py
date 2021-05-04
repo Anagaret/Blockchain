@@ -4,8 +4,9 @@ from datetime import datetime;
 
 class Blockchain:
 
-    def __init__(self, data):
+    def __init__(self, data, difficulty):
         self.list_blocks = []
+        self.difficulty = difficulty
         self.add_block(data)
 
    
@@ -19,10 +20,10 @@ class Blockchain:
             previous_hash = previous_block.hash
             index = previous_block.index + 1 
         timestamp = datetime.timestamp(datetime.now())
-        self.list_blocks.append(Block(data, previous_hash, index, timestamp))
+        self.list_blocks.append(Block(data, previous_hash, index, timestamp, self.difficulty))
 
     def validate_block(self, block):
-        hash = Block(block.data, block.previous_hash, block.index, block.timestamp).create_hash()
+        hash = Block(block.data, block.previous_hash, block.index, block.timestamp, self.difficulty).create_hash()
         return (hash == block.hash)
 
    
