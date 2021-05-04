@@ -10,8 +10,7 @@ class Blockchain:
         self.list_blocks = []
         self.add_block(data)
 
-    def create_hash(self, data):
-        return hashlib.sha256(str(data).encode('utf-8')).hexdigest()
+   
 
     def add_block(self, data):
         if(len(self.list_blocks) == 0):
@@ -22,16 +21,11 @@ class Blockchain:
             previous_hash = previous_block.hash
             index = previous_block.index + 1 
         timestamp = datetime.timestamp(datetime.now())
-        nonce = 0
-        hash = self.create_hash(str({ 'index': index, 'timestamp': timestamp, 'nonce': nonce, 'previous_hash': previous_hash, 'data': data}))
-        while not re.search(r"^[0]{4}", hash):
-                nonce +=1
-                hash = self.create_hash(str({ 'index': index, 'timestamp': timestamp, 'nonce': nonce, 'previous_hash': previous_hash, 'data': data}))
-        self.list_blocks.append(Block(hash, data, previous_hash, nonce, index, timestamp))
+        self.list_blocks.append(Block(data, previous_hash, index, timestamp))
 
-    def validate_block(self, block):
-        hash = self.create_hash(str({ 'index': block.index, 'timestamp': block.timestamp, 'nonce': block.nonce, 'previous_hash': block.previous_hash, 'data': block.data}))
-        return (hash == block.hash)
+    # def validate_block(self, block):
+    #     hash = self.create_hash(str({ 'index': block.index, 'timestamp': block.timestamp, 'nonce': block.nonce, 'previous_hash': block.previous_hash, 'data': block.data}))
+    #     return (hash == block.hash)
 
    
 
