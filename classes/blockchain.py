@@ -21,7 +21,7 @@ class Blockchain:
         expectedZero = 1
         nonce = 1
         hash = hashlib.sha256(str({ 'index': index, 'timestamp': timestamp, 'nonce': nonce, 'previous_hash': previous_hash, 'data': data}).encode('utf-8')).hexdigest()
-        while not re.search(r"^[0]{2}", hash):
+        while not re.search(r"^[0]{4}", hash):
                 nonce +=1
                 hash = hashlib.sha256(str({ 'index': index, 'timestamp': timestamp, 'nonce': nonce, 'previous_hash': previous_hash, 'data': data}).encode('utf-8')).hexdigest()
         print(hash)
