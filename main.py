@@ -2,10 +2,10 @@
 # tester notre code par le terminal 
 from classes.blockchain import Blockchain
 
-blockchain1 = Blockchain('coucou', None)
-print(blockchain1.block.hash)
-block2 = Blockchain('salut', blockchain1.block)
-print(blockchain2.block.hash)
-
-
+blockchain = Blockchain('coucou')
+blockchain.add_block('salut')
+print(len(blockchain.list_blocks))
+block2 = blockchain.list_blocks[1]
+validate_block2 = blockchain.validate_block(block2)
+print(validate_block2)
 
