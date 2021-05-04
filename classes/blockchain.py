@@ -1,7 +1,5 @@
 from .block import Block
-import hashlib
 from datetime import datetime;
-import re
 
 
 class Blockchain:
@@ -23,9 +21,9 @@ class Blockchain:
         timestamp = datetime.timestamp(datetime.now())
         self.list_blocks.append(Block(data, previous_hash, index, timestamp))
 
-    # def validate_block(self, block):
-    #     hash = self.create_hash(str({ 'index': block.index, 'timestamp': block.timestamp, 'nonce': block.nonce, 'previous_hash': block.previous_hash, 'data': block.data}))
-    #     return (hash == block.hash)
+    def validate_block(self, block):
+        hash = Block(block.data, block.previous_hash, block.index, block.timestamp).create_hash()
+        return (hash == block.hash)
 
    
 
