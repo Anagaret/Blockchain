@@ -15,3 +15,5 @@ print(validate_block2)
 pictureblockchain = PictureBlockchain('test.jpg')
 print(pictureblockchain.list_blocks[0].hash)
 
+blockchain.store_json('store')
+

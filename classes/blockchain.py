@@ -1,5 +1,8 @@
 from .block import Block
 from datetime import datetime;
+import os 
+cwd = os.getcwd()
+import json
 
 
 class Blockchain:
@@ -25,12 +28,25 @@ class Blockchain:
     def validate_block(self, block):
         hash = Block(block.data, block.previous_hash, block.index, block.timestamp, self.difficulty).create_hash()
         return (hash == block.hash)
-
-   
-
-
-
-            
-
-
-            
+    
+    def block_to_json(block):
+        return {
+                'index': block.index,
+                'previous_hash': block.previous_hash,
+                'timestamp': block.timestamp,
+                'data': block.data,
+                'hash': block.hash,
+                'nonce': block.nonce
+        }
+    def store_json(self, filename):
+        result = map(lambda block: {
+                        'index': block.index,
+                        'previous_hash': block.previous_hash,
+                        'timestamp': block.timestamp,
+                        'data': block.data,
+                        'hash': block.hash,
+                        'nonce': block.nonce
+                    },self.list_blocks)
+        f = open(cwd +'/jsons/' + filename + '.json', 'w', encoding='utf-8')
+        f.write(json.dumps(list(result), indent=4, sort_keys=True))
+        f.close()
