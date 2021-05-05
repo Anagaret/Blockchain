@@ -2,6 +2,7 @@
 # tester notre code par le terminal 
 from classes.blockchain import Blockchain
 from classes.pictureblockchain import PictureBlockchain
+from classes.sql import SQL
 
 blockchain = Blockchain('coucou',4)
 print(blockchain.list_blocks[0].hash)

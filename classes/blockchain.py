@@ -12,8 +12,6 @@ class Blockchain:
         self.difficulty = difficulty
         self.add_block(data)
 
-   
-
     def add_block(self, data):
         if(len(self.list_blocks) == 0):
             index = 0
@@ -38,7 +36,7 @@ class Blockchain:
                 'hash': block.hash,
                 'nonce': block.nonce
         }
-        
+
     def store_json(self, filename):
         result = map(lambda block: {
                         'index': block.index,

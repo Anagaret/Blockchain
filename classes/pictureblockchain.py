@@ -19,3 +19,5 @@ class PictureBlockchain(Blockchain):
         except:
             raise ValueError('File path is wrong.')
     
+
+    # def add_picture(self, path):
