@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS "user"(
     tel TEXT NOT NULL,
     nom TEXT NOT NULL,
     prenom TEXT NOT NULL,
-    paypal TEXT NOT NULL,
-    "password" TEXT NOT NULL
+    paypal TEXT NOT NULL
 );
 DROP TABLE IF EXISTS artwork;
 CREATE table IF NOT EXISTS "artwork"(
