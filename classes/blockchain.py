@@ -38,6 +38,7 @@ class Blockchain:
                 'hash': block.hash,
                 'nonce': block.nonce
         }
+        
     def store_json(self, filename):
         result = map(lambda block: {
                         'index': block.index,
@@ -50,3 +51,24 @@ class Blockchain:
         f = open(cwd +'/jsons/' + filename + '.json', 'w', encoding='utf-8')
         f.write(json.dumps(list(result), indent=4, sort_keys=True))
         f.close()
+    
+    def validate_previous_hash(self, previous_block, previous_hash):
+        if previous_hash is None and previous_block is None:
+            return True
+        else:
+            hash = Block(previous_block.data, previous_block.previous_hash, previous_block.index, previous_block.timestamp, self.difficulty).create_hash()
+            return (hash == previous_hash)
+
+
+    def validate_integrity(self):
+        i = 0
+        for block in self.list_blocks:
+            if(i == 0):
+                previous_block = None
+                previous_hash = None 
+            else:
+                previous_block = self.list_blocks[i - 1]
+                previous_hash = block.previous_hash
+            while  not self.validate_block(block) and not self.validate_previous_hash(previous_block, previous_hash):
+                return False
+        return True

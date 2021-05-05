@@ -17,3 +17,6 @@ print(pictureblockchain.list_blocks[0].hash)
 
 blockchain.store_json('store')
 
+print(blockchain.validate_integrity())
+print(blockchain.validate_previous_hash(blockchain.list_blocks[0], blockchain.list_blocks[1].previous_hash))
+
