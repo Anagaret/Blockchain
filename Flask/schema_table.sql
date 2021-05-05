@@ -14,7 +14,7 @@ CREATE table IF NOT EXISTS "artwork"(
     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
     filename TEXT NOT NULL,
     price NUMERIC NOT NULL,
-    available INTEGER
+    available INTEGER DEFAULT 1
 );
 DROP TABLE IF EXISTS block;
 CREATE table IF NOT EXISTS "block"(
