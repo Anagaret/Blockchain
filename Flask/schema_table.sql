@@ -27,8 +27,8 @@ CREATE table IF NOT EXISTS "block"(
     nonce NUMERIC NOT NULL,
     id_artwork NUMERIC NOT NULL,
     id_user_creator NUMERIC NOT NULL,
-    id_user_owner NUMERIC NOT NULL,
-  	FOREIGN KEY (id_artwork) REFERENCES artwork(id),
-    FOREIGN KEY (id_user_creator) REFERENCES user(id),
-    FOREIGN KEY (id_user_owner) REFERENCES user(id)
+    id_user_owner NUMERIC NOT NULL
+    -- FOREIGN KEY (id_artwork) REFERENCES artwork(id),
+    -- FOREIGN KEY (id_user_creator) REFERENCES user(id),
+    -- FOREIGN KEY (id_user_owner) REFERENCES user(id)
 );
