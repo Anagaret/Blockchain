@@ -6,6 +6,20 @@ import json
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+# @app.route('/books', methods['POST'])
+# def add_book():
+#     connect = sqlite3.connect('./database.db')
+
+#     sql = ''' ................ '''
+#     cursor = connect.cursor()
+
+#     body = request.get_json()
+#     data = json.loads(json.dumps(body))
+
+#     cursor.execute(sql, data)
+#     connect.commit()
+
+#     return ......
 
 
 app.run()
