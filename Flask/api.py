@@ -84,7 +84,23 @@ def get_artwork(id_artwork):
             artwork = {}
         return jsonify(artwork)
     except sqlite3.Error as er:
-        print(er)
+        return {"error": "Probleme base de donne ."}
+
+
+@app.route("/artwork", methods=["GET"])
+def get__all_artwork():
+    connect = sqlite3.connect("./database.db")
+    connect.row_factory = dict_factory
+    try:
+        cursor = connect.cursor()
+        artworks = cursor.execute(
+            """ select b.id_user_creator, b.id_artwork, b.id_user_owner, a.filename,
+         a.price, a.available from artwork a INNER JOIN block b ON a.id = b.id_artwork """
+        ).fetchall()
+        if not artworks:
+            artworks = {}
+        return jsonify(artworks)
+    except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
 
 
