@@ -4,6 +4,7 @@ import sqlite3
 import json
 from werkzeug.utils import secure_filename
 from classes.pictureblock import PictureBlock
+import hashlib
 import os 
 cwd = os.getcwd()
 
@@ -15,7 +16,12 @@ app.config["DEBUG"] = True
 =======
 @app.route("/user", methods=["POST"])
 def add_user():
+    body = request.get_json()
+    def hash_password(password):
+        salt = os.urandom(32)
+        return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
     connect = sqlite3.connect('./database.db')
+    
     try:
         sql = '''INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
                    VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) '''
