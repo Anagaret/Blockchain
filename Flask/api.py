@@ -106,9 +106,7 @@ def dict_factory(cursor, row):
 @app.route('/')
 def index():
     if not session.get('token'):
-        print('pas logged donc ')
         return render_template('login.html')
-    print('logged')
 
     return render_template('index.html')
 
