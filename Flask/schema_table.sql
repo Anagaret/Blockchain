@@ -14,7 +14,7 @@ CREATE table IF NOT EXISTS "artwork"(
     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
     filename TEXT NOT NULL,
     price NUMERIC NOT NULL,
-    available INTEGER
+    available INTEGER DEFAULT 1
 );
 DROP TABLE IF EXISTS block;
 CREATE table IF NOT EXISTS "block"(
@@ -28,7 +28,7 @@ CREATE table IF NOT EXISTS "block"(
     id_artwork NUMERIC NOT NULL,
     id_user_creator NUMERIC NOT NULL,
     id_user_owner NUMERIC NOT NULL,
-  	FOREIGN KEY (id_artwork) REFERENCES artwork(id),
+    FOREIGN KEY (id_artwork) REFERENCES artwork(id),
     FOREIGN KEY (id_user_creator) REFERENCES user(id),
     FOREIGN KEY (id_user_owner) REFERENCES user(id)
 );

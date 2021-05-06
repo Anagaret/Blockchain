@@ -1,14 +1,17 @@
 import sqlite3
 connexion  = sqlite3.connect("./database.db")
 curseur = connexion.cursor()
+import os 
+cwd = os.getcwd()
 
 
     
 def create_table(): 
     try:
-        with open('schema_table.sql', 'r') as sql_file:
+        with open(cwd + '/Flask/schema_table.sql', 'r') as sql_file:
             curseur.executescript(sql_file.read())
             connexion.commit()
+            connexion.close()
     except:
         raise ValueError('Problem creating tables')
     
