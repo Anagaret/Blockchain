@@ -200,7 +200,7 @@ def get_all_creator():
             """ select DISTINCT (b.id_user_owner), pseudo from block b INNER JOIN user u  
             ON b.id_user_owner = u.id """ ,
         ).fetchall()
-        if not creators:
+        if not block:
             creators = []
         return jsonify(creators)
     except sqlite3.Error as er:

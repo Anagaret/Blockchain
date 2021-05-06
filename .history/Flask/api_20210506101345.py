@@ -101,7 +101,7 @@ def get_all_artwork():
          a.price, a.available from artwork a INNER JOIN block b ON a.id = b.id_artwork """
         ).fetchall()
         if not artworks:
-            artworks = []
+            artworks = {}
         return jsonify(artworks)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -120,7 +120,7 @@ def get_all_artwork_by_creator(id_user_creator):
             [id_user_creator],
         ).fetchall()
         if not artworks:
-            artworks = []
+            artworks = {}
         return jsonify(artworks)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -192,19 +192,5 @@ def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
 
 @app.route("/creator", methods=["GET"])
 def get_all_creator():
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
-    try:
-        cursor = connect.cursor()
-        creators = cursor.execute(
-            """ select DISTINCT (b.id_user_owner), pseudo from block b INNER JOIN user u  
-            ON b.id_user_owner = u.id """ ,
-        ).fetchall()
-        if not creators:
-            creators = []
-        return jsonify(creators)
-    except sqlite3.Error as er:
-        return {"error": "Probleme base de donne ."}
-    
     
 app.run()
