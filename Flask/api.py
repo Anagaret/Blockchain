@@ -11,6 +11,47 @@ cwd = os.getcwd()
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+<<<<<<< Updated upstream
+=======
+@app.route("/user", methods=["POST"])
+def add_user():
+    connect = sqlite3.connect('./database.db')
+    try:
+        sql = '''INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
+                   VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) '''
+        data = json.loads(json.dumps({"pseudo": pseudo, "email": email, "tel": tel, "nom": nom, "prenom": prenom, "paypal": paypal, "password": password}))            
+        cursor = connect.cursor()
+        cursor.execute(sql_create_user, data)
+        id_user = cursor.lastrowid
+        connect.commit()
+    except sqlite3.Error as er:
+            return {"error": "Les données ne sont pas complètes, veuillez réessayer"}
+
+@app.route("/user/id_user", methods=["DELETE"])
+def delete_user():
+    connect = sqlite3.connect('./database.db')
+    try:
+        sql = '''DELETE FROM user WHERE id = id_user '''
+        data = json.loads(json.dumps({"id_user": id_user}))            
+        cursor = connect.cursor()
+        cursor.execute(sql_delete_user, data)
+        connect.commit()
+    except sqlite3.Error as er:
+            return {"error": "ID Inexistant, veuillez vous reconnecter"}
+
+
+delete => ip/user/{id_user} A
+    - suppression du compte
+
+post => ip/login (email, mot de passe)  A
+    - on check si email existe 
+    - on hash le mot de passe on vient tester avec le hash en bd de
+    - renvoie un token 
+
+# @app.route('/books', methods['POST'])
+# def add_book():
+#     connect = sqlite3.connect('./database.db')
+>>>>>>> Stashed changes
 
 def dict_factory(cursor, row):
     d = {}
