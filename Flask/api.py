@@ -25,30 +25,17 @@ def add_user():
     except sqlite3.Error as er:
             return {"error": "Les données ne sont pas complètes, veuillez réessayer"}
 
-@app.route("/user/id_user", methods=["DELETE"])
-def delete_user():
+@app.route("/user/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
     connect = sqlite3.connect('./database.db')
     try:
-        sql = '''DELETE FROM user WHERE id = id_user '''
-        data = json.loads(json.dumps({"id_user": id_user}))            
+        sql = '''DELETE FROM user WHERE id = ? '''
         cursor = connect.cursor()
-        cursor.execute(sql_delete_user, data)
+        cursor.execute(sql, [user_id])
         connect.commit()
+        return {"success": "Utilisateur supprime"}
     except sqlite3.Error as er:
             return {"error": "ID Inexistant, veuillez vous reconnecter"}
-
-
-delete => ip/user/{id_user} A
-    - suppression du compte
-
-post => ip/login (email, mot de passe)  A
-    - on check si email existe 
-    - on hash le mot de passe on vient tester avec le hash en bd de
-    - renvoie un token 
-
-# @app.route('/books', methods['POST'])
-# def add_book():
-#     connect = sqlite3.connect('./database.db')
 
 def dict_factory(cursor, row):
     d = {}
