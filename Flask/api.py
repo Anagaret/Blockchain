@@ -11,8 +11,6 @@ cwd = os.getcwd()
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
-<<<<<<< Updated upstream
-=======
 @app.route("/user", methods=["POST"])
 def add_user():
     connect = sqlite3.connect('./database.db')
@@ -51,7 +49,6 @@ post => ip/login (email, mot de passe)  A
 # @app.route('/books', methods['POST'])
 # def add_book():
 #     connect = sqlite3.connect('./database.db')
->>>>>>> Stashed changes
 
 def dict_factory(cursor, row):
     d = {}
