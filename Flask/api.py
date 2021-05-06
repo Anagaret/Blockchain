@@ -7,6 +7,7 @@ from classes.pictureblock import PictureBlock
 import bcrypt
 import os
 import jwt
+import re
 
 cwd = os.getcwd()
 
@@ -40,9 +41,14 @@ def add_user():
     if "pseudo" not in body:
         return {"error": "Le pseudo est manquant."}
 
-    password = hash_password(body["password"])
+    if not re.search(r"\S+[@]\w+[.]+\w+",body['email']):
+        return {"error": "L'email n'est pas au bon format"}
 
-    print(type(password))
+    if not re.search(r"^[0][6-7]{1}[0-9]{8}$", body['tel']):
+        return {"error": "Le numéro n'est pas au bon format. Il doit etre un 06 ou 07."}
+
+
+    password = hash_password(body["password"])
  
     try:
         sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
@@ -76,8 +82,7 @@ def add_user():
                 }
 
     except sqlite3.Error as er:
-        print(er)
-        return {"error": "Les données ne sont pas complètes, veuillez réessayer"}
+        return {"error": "Doublon d'information"}
 
 
 @app.route("/user/<int:user_id>", methods=["DELETE"])
