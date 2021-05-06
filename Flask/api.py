@@ -1,5 +1,5 @@
 import flask
-from flask import redirect, url_for, request, jsonify
+from flask import redirect, url_for, request, jsonify, flash, render_template
 import sqlite3
 import json
 from werkzeug.utils import secure_filename
@@ -14,6 +14,7 @@ cwd = os.getcwd()
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+app.config['SECRET_KEY'] = 'your secret key'
 
 
 @app.route("/user", methods=["POST"])
@@ -249,7 +250,8 @@ def login():
 
     body = request.get_json()
     if "email" not in body:
-        return {"error": "L'email utilisateur manquant."}
+        flash("Please enter")
+        # return {"error": "L'email utilisateur manquant."}
 
     if "password" not in body:
         return {"error": "Le mot de passe est manquant."}
@@ -324,5 +326,9 @@ def get_all_creator():
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
 
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 app.run()
