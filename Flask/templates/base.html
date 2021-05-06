@@ -25,16 +25,20 @@
       <ul class="navbar-nav">
         {% if session['token'] %}
         <li class="nav-item">
+          <a class="nav-link" href="{{url_for('add_artwork')}}">Déposer son œuvre
+          </a>
+        </li>
+        {% endif %}
+        {% if session['token'] %}
+        <li class="nav-item">
           <a class="nav-link" href="{{url_for('logout')}}">Déconnexion</a>
         </li>
         {% else %}
         <li class="nav-item">
           <a class="nav-link" href="{{url_for('add_user')}}">Inscription</a>
         </li>
-      
         {% endif %}
-
-      </ul>
+        </ul>
     </div>
   </nav>
   <div class="container">

@@ -107,60 +107,76 @@ def dict_factory(cursor, row):
 def index():
     if not session.get('token'):
         return render_template('login.html')
-
     return render_template('index.html')
 
-@app.route("/user/<int:user_id>/artwork", methods=["POST"])
-def add_artwork(user_id):
-    connect = sqlite3.connect("./database.db")
-    f = request.files["picture"]
-    if "image" not in f.mimetype:
-        return {"error": "Le fichier transmit n'est pas une image ."}
-    price = request.form.get("price", None)
-    if price is None:
-        return {"error": "Le prix n'est pas present ."}
-    try:
-        price = float(price.replace(",", "."))
-        f.save(cwd + "/pictures/" + secure_filename(f.filename))
-        try:
-            sql_create_artwork = """ INSERT INTO artwork(price, filename)
-                                VALUES (:price, :filename) """
-            data = json.loads(json.dumps({"price": price, "filename": f.filename}))
-            cursor = connect.cursor()
-            cursor.execute(sql_create_artwork, data)
-            id_artwork = cursor.lastrowid
-            connect.commit()
-            block = PictureBlock(f.filename)
-            sql_create_block = """ INSERT INTO block("index", previous_hash, "timestamp", hash, nonce, id_artwork, id_user_creator, id_user_owner, data) 
-                                VALUES (:index, :previous_hash, :timestamp, :hash, :nonce, :id_artwork, :id_user_creator, :id_user_owner, :data) """
+@app.route("/artwork/new", methods=["GET","POST"])
+def add_artwork():
+    if request.method == "POST":
+        connect = sqlite3.connect("./database.db")
+        if 'picture' not in request.files:
+            flash("Aucun fichier")
+            return redirect(request.url)
+        f = request.files['picture']
+        if f.filename == '':
+            flash('Aucune fichier selectionné')
+            return redirect(request.url)
+        print(type(f.mimetype))
+        print(f.mimetype)
 
-            data_block = {
-                "index": block.index,
-                "previous_hash": block.previous_hash,
-                "timestamp": block.timestamp,
-                "hash": block.hash,
-                "nonce": block.nonce,
-                "id_artwork": id_artwork,
-                "id_user_creator": user_id,
-                "id_user_owner": user_id,
-                "data": str(block.data),
-            }
-            json.loads(json.dumps(data_block))
-            cursor.execute(sql_create_block, json.loads(json.dumps(data_block)))
-            connect.commit()
-            return {
-                "id": id_artwork,
-                "price": price,
-                "filename": f.filename,
-                "available": 1,
-                "id_user_creator": user_id,
-                "id_user_owner": user_id,
-            }
+        if "image" not in f.mimetype:
+            flash("Le fichier transmit n'est pas une image .")
+            return render_template('add_artwork.html')
+
+
+        price = request.form.get("price", None)
+        if price is None:
+            flash("Le prix n'est pas present .")
+            return render_template('add_artwork.html')
+        try:
+            price = float(price.replace(",", "."))
+            f.save(cwd + "/pictures/" + secure_filename(f.filename))
+            try:
+                user_id = session.get('user')['id']
+                sql_create_artwork = """ INSERT INTO artwork(price, filename)
+                                    VALUES (:price, :filename) """
+                data = json.loads(json.dumps({"price": price, "filename": f.filename}))
+                cursor = connect.cursor()
+                cursor.execute(sql_create_artwork, data)
+                id_artwork = cursor.lastrowid
+                connect.commit()
+                block = PictureBlock(f.filename)
+                sql_create_block = """ INSERT INTO block("index", previous_hash, "timestamp", hash, nonce, id_artwork, id_user_creator, id_user_owner, data) 
+                                    VALUES (:index, :previous_hash, :timestamp, :hash, :nonce, :id_artwork, :id_user_creator, :id_user_owner, :data) """
+
+                data_block = {
+                    "index": block.index,
+                    "previous_hash": block.previous_hash,
+                    "timestamp": block.timestamp,
+                    "hash": block.hash,
+                    "nonce": block.nonce,
+                    "id_artwork": id_artwork,
+                    "id_user_creator": user_id,
+                    "id_user_owner": user_id,
+                    "data": str(block.data),
+                }
+                json.loads(json.dumps(data_block))
+                cursor.execute(sql_create_block, json.loads(json.dumps(data_block)))
+                connect.commit()
+
+
+            except sqlite3.Error as er:
+                flash("Probleme insertion artwork")
+                return render_template('add_artwork.html')
 
         except sqlite3.Error as er:
-            return {"error": "Probleme insertion artwork"}
-    except sqlite3.Error as er:
-        return {"error": "Le prix n'est pas au bon format ."}
+            flash("Le prix n'est pas au bon format .")
+            return render_template('add_artwork.html')
+        return render_template('add_artwork.html', filename=f.filename)
+
+    elif not session.get('token'):
+        return render_template('login.html')
+    else:
+        return render_template('add_artwork.html')
 
 
 @app.route("/artwork/<int:id_artwork>/", methods=["GET"])
