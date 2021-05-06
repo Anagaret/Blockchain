@@ -4,38 +4,56 @@ import sqlite3
 import json
 from werkzeug.utils import secure_filename
 from classes.pictureblock import PictureBlock
-import os 
+import hashlib
+import os
+import jwt
+
 cwd = os.getcwd()
 
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+
 @app.route("/user", methods=["POST"])
 def add_user():
-    connect = sqlite3.connect('./database.db')
+    connect = sqlite3.connect("./database.db")
     try:
-        sql = '''INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
-                   VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) '''
-        data = json.loads(json.dumps({"pseudo": pseudo, "email": email, "tel": tel, "nom": nom, "prenom": prenom, "paypal": paypal, "password": password}))            
+        sql = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
+                   VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) """
+        data = json.loads(
+            json.dumps(
+                {
+                    "pseudo": pseudo,
+                    "email": email,
+                    "tel": tel,
+                    "nom": nom,
+                    "prenom": prenom,
+                    "paypal": paypal,
+                    "password": password,
+                }
+            )
+        )
         cursor = connect.cursor()
         cursor.execute(sql_create_user, data)
         id_user = cursor.lastrowid
         connect.commit()
     except sqlite3.Error as er:
-            return {"error": "Les données ne sont pas complètes, veuillez réessayer"}
+        return {"error": "Les données ne sont pas complètes, veuillez réessayer"}
+
 
 @app.route("/user/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
-    connect = sqlite3.connect('./database.db')
+    connect = sqlite3.connect("./database.db")
     try:
-        sql = '''DELETE FROM user WHERE id = ? '''
+        sql = """DELETE FROM user WHERE id = ? """
         cursor = connect.cursor()
         cursor.execute(sql, [user_id])
         connect.commit()
         return {"success": "Utilisateur supprime"}
     except sqlite3.Error as er:
-            return {"error": "ID Inexistant, veuillez vous reconnecter"}
+        return {"error": "ID Inexistant, veuillez vous reconnecter"}
+
 
 def dict_factory(cursor, row):
     d = {}
@@ -77,7 +95,7 @@ def add_artwork(user_id):
                 "id_artwork": id_artwork,
                 "id_user_creator": user_id,
                 "id_user_owner": user_id,
-                "data": str(block.data)
+                "data": str(block.data),
             }
             json.loads(json.dumps(data_block))
             cursor.execute(sql_create_block, json.loads(json.dumps(data_block)))
@@ -176,6 +194,42 @@ def buy_artwork(id_artwork):
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
 
+
+def hash_password(password):
+    salt = os.urandom(32)
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000)
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    connect = sqlite3.connect("./database.db")
+    connect.row_factory = dict_factory
+
+    body = request.get_json()
+    if "email" not in body:
+        return {"error": "L'email utilisateur manquant."}
+
+    if "password" not in body:
+        return {"error": "Le mot de passe est manquant."}
+
+    try:
+        cursor = connect.cursor()
+        user = cursor.execute(
+            """ select * from user where email = ? """, [body["email"]]
+        ).fetchone()
+        if not user:
+            return {"error": "Email non trouvé"}
+        if hash_password(password) != user["password"]:
+            return {"error": "Mot de passe incorrect"}
+
+        token = jwt.encode(jsonify(user), "123456789", algorithm="HS256")
+        return {"token": token}
+
+        return redirect("/artwork/" + str(id_artwork))
+    except sqlite3.Error as er:
+        return {"error": "Probleme base de donne ."}
+
+
 @app.route("/user/<int:id_user_owner>/block", methods=["GET"])
 def get_block_by_id_user_owner(id_user_owner):
     connect = sqlite3.connect("./database.db")
@@ -194,8 +248,6 @@ def get_block_by_id_user_owner(id_user_owner):
         return {"error": "Probleme base de donne ."}
 
 
-
-
 @app.route("/user/<int:id_user_owner>/block/<int:id_block>", methods=["GET"])
 def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
     connect = sqlite3.connect("./database.db")
@@ -204,7 +256,7 @@ def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
         cursor = connect.cursor()
         block = cursor.execute(
             """ select "index", previous_hash, data, "timestamp", hash, nonce from block
-            WHERE id_user_owner = ? and id= ? """ ,
+            WHERE id_user_owner = ? and id= ? """,
             [id_user_owner, id_block],
         ).fetchone()
         if not block:
@@ -222,13 +274,13 @@ def get_all_creator():
         cursor = connect.cursor()
         creators = cursor.execute(
             """ select DISTINCT (b.id_user_owner), pseudo from block b INNER JOIN user u  
-            ON b.id_user_owner = u.id """ ,
+            ON b.id_user_owner = u.id """,
         ).fetchall()
         if not creators:
             creators = []
         return jsonify(creators)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
-    
-    
+
+
 app.run()
