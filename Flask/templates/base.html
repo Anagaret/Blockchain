@@ -28,10 +28,12 @@
           <a class="nav-link" href="{{url_for('add_artwork')}}">Déposer son œuvre
           </a>
         </li>
-        {% endif %}
-        {% if session['token'] %}
         <li class="nav-item">
           <a class="nav-link" href="{{url_for('get_all_artwork_by_creator')}}">Mes œuvres
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('user_profil')}}">Mon profil
           </a>
         </li>
         {% endif %}
@@ -44,7 +46,7 @@
           <a class="nav-link" href="{{url_for('add_user')}}">Inscription</a>
         </li>
         {% endif %}
-        </ul>
+      </ul>
     </div>
   </nav>
   <div class="container">

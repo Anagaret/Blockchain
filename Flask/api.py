@@ -25,7 +25,6 @@ def add_user():
         if "email" not in form:
             flash("L'email utilisateur manquant.")
             return render_template('create_user.html')
-
         if "password" not in form:
             flash("Le mot de passe est manquant.")
             return render_template('create_user.html')
@@ -75,7 +74,7 @@ def add_user():
             id_user = cursor.lastrowid
 
 
-            return render_template('index.html')
+            return index()
 
 
         except sqlite3.Error as er:
@@ -84,17 +83,25 @@ def add_user():
     return render_template('create_user.html')
 
 
-@app.route("/user/<int:user_id>", methods=["DELETE"])
-def delete_user(user_id):
-    connect = sqlite3.connect("./database.db")
-    try:
-        sql = """DELETE FROM user WHERE id = ? """
-        cursor = connect.cursor()
-        cursor.execute(sql, [user_id])
-        connect.commit()
-        return {"success": "Utilisateur supprime"}
-    except sqlite3.Error as er:
-        return {"error": "ID Inexistant, veuillez vous reconnecter"}
+@app.route("/delete_user", methods=["GET"])
+def delete_user():
+    print('on oasse ici')
+
+    if not session.get('token'):
+        return login()
+    else:
+        connect = sqlite3.connect("./database.db")
+        user_id = session.get('user')['id']
+        try:
+            sql = """  UPDATE user SET disabled = ? WHERE id = ? """
+            cursor = connect.cursor()
+            cursor.execute(sql, [1,user_id])
+            connect.commit()
+            return logout()
+        except sqlite3.Error as er:
+            print(er)
+            flash("Probleme base de donne .")
+            return user_profil()
 
 
 def dict_factory(cursor, row):
@@ -227,7 +234,7 @@ def get_all_artwork_by_creator():
             artworks = cursor.execute(
                 """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
                 INNER JOIN user u ON u.id = b.id_user_creator
-            WHERE b.id_user_creator = ? """,
+            WHERE b.id_user_owner = ? """,
                 [id_user_creator],
             ).fetchall()
             return render_template('user_artworks.html', artworks=artworks)
@@ -269,7 +276,6 @@ def hash_password(password):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        print('post login ')
         connect = sqlite3.connect("./database.db")
         connect.row_factory = dict_factory
 
@@ -288,7 +294,7 @@ def login():
         try:
             cursor = connect.cursor()
             user = cursor.execute(
-                """ select * from user where email = ? """, [form["email"]]
+                """ select * from user where email = ?  and disabled = 0""", [form["email"]]
             ).fetchone()
             if not user:
                 flash("Utilisateur non trouvé")
@@ -366,6 +372,24 @@ def logout():
     session['token'] = None
     session['user'] = None
     return index()
+
+
+@app.route("/user_profil", methods=["GET"])
+def user_profil():
+    connect = sqlite3.connect("./database.db")
+    connect.row_factory = dict_factory
+    try:
+        cursor = connect.cursor()
+        data = cursor.execute(
+            """ select count(DISTINCT(id)) as count  from block WHERE id_user_owner = ?""",
+            [session.get('user')['id']]
+        ).fetchone()
+        return render_template('user_profil.html', data={'count':data['count'], 'user': session.get('user')})
+
+    except sqlite3.Error as er:
+        flash("Probleme base de donne .")
+
+
 
 
 

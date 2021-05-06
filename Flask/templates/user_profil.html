@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Mon profil{% endblock %}</h1>
+<ul class="list-group list-group-flush">
+    <li class="list-group-item">Nom : {{ data.user['nom']}}</li>
+    <li class="list-group-item">Prénom : {{ data.user['prenom']}}</li>
+    <li class="list-group-item">Pseudo : {{ data.user['pseudo']}}</li>
+    <li class="list-group-item">Mail : {{ data.user['email']}}</li>
+    <li class="list-group-item">Téléphone : {{ data.user['tel']}}</li>
+    <li class="list-group-item">Paypal : {{ data.user['paypal']}}</li>
+    <li class="list-group-item">Je possède  {{ data['count']}} œuvre(s) .</li>
+    </li>
+</ul>
+
+<a class="nav-link" href="{{url_for('delete_user')}}">Supprimer mon compte 
+</a>
+{% endblock %}
