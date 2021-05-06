@@ -4,7 +4,7 @@ import sqlite3
 import json
 from werkzeug.utils import secure_filename
 from classes.pictureblock import PictureBlock
-import hashlib
+import bcrypt
 import os
 import jwt
 
@@ -41,6 +41,8 @@ def add_user():
         return {"error": "Le pseudo est manquant."}
 
     password = hash_password(body["password"])
+
+    print(type(password))
  
     try:
         sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
@@ -232,8 +234,7 @@ def buy_artwork(id_artwork):
 
 
 def hash_password(password):
-    salt = os.urandom(32)
-    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000).hex()
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 @app.route("/login", methods=["POST"])
@@ -255,10 +256,10 @@ def login():
         ).fetchone()
         if not user:
             return {"error": "Email non trouvé"}
-        if hash_password(password) != user["password"]:
+        if not bcrypt.checkpw(body['password'].encode("utf-8"), user["password"].encode("utf-8")):
             return {"error": "Mot de passe incorrect"}
 
-        token = jwt.encode(jsonify(user), "123456789", algorithm="HS256")
+        token = jwt.encode({'id': user["id"], "pseudo" : user["pseudo"]}, "123456789", algorithm="HS256")
         return {"token": token}
 
         return redirect("/artwork/" + str(id_artwork))
