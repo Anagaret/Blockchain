@@ -134,7 +134,7 @@ def add_artwork():
             return render_template('add_artwork.html')
         try:
             price = float(price.replace(",", "."))
-            f.save(cwd + "/pictures/" + secure_filename(f.filename))
+            f.save(cwd + "/static/pictures/" + secure_filename(f.filename))
             try:
                 user_id = session.get('user')['id']
                 sql_create_artwork = """ INSERT INTO artwork(price, filename)
@@ -214,23 +214,26 @@ def get_all_artwork():
         return {"error": "Probleme base de donne ."}
 
 
-@app.route("/user/<int:id_user_creator>/artwork", methods=["GET"])
-def get_all_artwork_by_creator(id_user_creator):
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
-    try:
-        cursor = connect.cursor()
-        artworks = cursor.execute(
-            """ select b.id_user_creator, b.id_artwork, b.id_user_owner, a.filename,
-         a.price, a.available from artwork a INNER JOIN block b ON a.id = b.id_artwork 
-         WHERE b.id_user_creator = ? """,
-            [id_user_creator],
-        ).fetchall()
-        if not artworks:
-            artworks = []
-        return jsonify(artworks)
-    except sqlite3.Error as er:
-        return {"error": "Probleme base de donne ."}
+@app.route("/user/artwork", methods=["GET"])
+def get_all_artwork_by_creator():
+    if not session.get('token'):
+        return render_template('login.html')
+    else:
+        id_user_creator = session.get('user')['id']
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
+        try:
+            cursor = connect.cursor()
+            artworks = cursor.execute(
+                """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
+                INNER JOIN user u ON u.id = b.id_user_creator
+            WHERE b.id_user_creator = ? """,
+                [id_user_creator],
+            ).fetchall()
+            return render_template('user_artworks.html', artworks=artworks)
+        except sqlite3.Error as er:
+            flash("Probleme base de donne .")
+            return render_template('user_artworks.html')
 
 
 @app.route("/buy_artwork/<int:id_artwork>", methods=["PUT"])
