@@ -132,7 +132,6 @@ def buy_artwork(id_artwork):
     connect.row_factory = dict_factory
 
     body = request.get_json()
-    print(hasattr(body, "id_user"))
     if "id_user" not in body:
         return {"error": "L'identifiant utilisateur pour l'achat est manquant."}
 
