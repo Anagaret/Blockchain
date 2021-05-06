@@ -17,73 +17,72 @@ app.config["DEBUG"] = True
 app.config['SECRET_KEY'] = 'your secret key'
 
 
-@app.route("/user", methods=["POST"])
+@app.route("/user", methods=['GET', 'POST'])
 def add_user():
-    body = request.get_json()
-    connect = sqlite3.connect('./database.db')
-    if "email" not in body:
-        return {"error": "L'email utilisateur manquant."}
+    print(request.form)
+    if request.method == 'POST':
+        body = request.form
+        connect = sqlite3.connect('./database.db')
+        if "email" not in body:
+            flash("L'email utilisateur manquant.")
+            return render_template('create_user.html')
 
-    if "password" not in body:
-        return {"error": "Le mot de passe est manquant."}
+        if "password" not in body:
+            flash("Le mot de passe est manquant.")
+            return render_template('create_user.html')
+        if "tel" not in body:
+            flash("Le telephone utilisateur est  manquant.")
+            return render_template('create_user.html')
+        if "nom" not in body:
+            flash("Le nom est manquant.")
+            return render_template('create_user.html')
+        if "prenom" not in body:
+            flash("Le prenom est manquant.")
+            return render_template('create_user.html')
+        if "paypal" not in body:
+            flash("Le paypal est manquant.")
+            return render_template('create_user.html')
+        if "pseudo" not in body:
+            flash("Le pseudo est manquant.")
+            return render_template('create_user.html')
+        if not re.search(r"\S+[@]\w+[.]+\w+",body['email']):
+            flash("L'email n'est pas au bon format")
+            return render_template('create_user.html')
+        if not re.search(r"^[0][6-7]{1}[0-9]{8}$", body['tel']):
+            flash("Le numéro n'est pas au bon format. Il doit etre un 06 ou 07.")
+            return render_template('create_user.html')
 
-    if "tel" not in body:
-        return {"error": "Le telephone utilisateur est  manquant."}
-
-    if "nom" not in body:
-        return {"error": "Le nom est manquant."}
+        password = hash_password(body["password"])
     
-    if "prenom" not in body:
-        return {"error": "Le prenom est manquant."}
-
-    if "paypal" not in body:
-        return {"error": "Le paypal est manquant."}
-
-    if "pseudo" not in body:
-        return {"error": "Le pseudo est manquant."}
-
-    if not re.search(r"\S+[@]\w+[.]+\w+",body['email']):
-        return {"error": "L'email n'est pas au bon format"}
-
-    if not re.search(r"^[0][6-7]{1}[0-9]{8}$", body['tel']):
-        return {"error": "Le numéro n'est pas au bon format. Il doit etre un 06 ou 07."}
-
-
-    password = hash_password(body["password"])
- 
-    try:
-        sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
-                   VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) """
-        data = json.loads(
-            json.dumps(
-                {
-                    "pseudo": body['pseudo'],
-                    "email": body['email'],
-                    "tel": body['tel'],
-                    "nom": body['nom'],
-                    "prenom": body['prenom'],
-                    "paypal": body['paypal'],
-                    "password": password
-                }
+        try:
+            sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
+                    VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) """
+            data = json.loads(
+                json.dumps(
+                    {
+                        "pseudo": body['pseudo'],
+                        "email": body['email'],
+                        "tel": body['tel'],
+                        "nom": body['nom'],
+                        "prenom": body['prenom'],
+                        "paypal": body['paypal'],
+                        "password": password
+                    }
+                )
             )
-        )
-        cursor = connect.cursor()
-        cursor.execute(sql_create_user, data)
-        connect.commit()
-        id_user = cursor.lastrowid
+            cursor = connect.cursor()
+            cursor.execute(sql_create_user, data)
+            connect.commit()
+            id_user = cursor.lastrowid
 
 
-        return {    "id": id_user,
-                    "pseudo": body['pseudo'],
-                    "email": body['email'],
-                    "tel": body['tel'],
-                    "nom": body['nom'],
-                    "prenom": body['prenom'],
-                    "paypal": body['paypal'],
-                }
+            return render_template('index.html')
 
-    except sqlite3.Error as er:
-        return {"error": "Doublon d'information"}
+
+        except sqlite3.Error as er:
+            flash("Doublon d'information")
+            return render_template('create_user.html')
+    return render_template('create_user.html')
 
 
 @app.route("/user/<int:user_id>", methods=["DELETE"])
