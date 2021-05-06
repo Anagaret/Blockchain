@@ -11,6 +11,7 @@ def create_table():
         with open(cwd + '/Flask/schema_table.sql', 'r') as sql_file:
             curseur.executescript(sql_file.read())
             connexion.commit()
+            connexion.close()
     except:
         raise ValueError('Problem creating tables')
     

@@ -18,32 +18,65 @@ app.config["DEBUG"] = True
 @app.route("/user", methods=["POST"])
 def add_user():
     body = request.get_json()
-    def hash_password(password):
-        salt = os.urandom(32)
-        return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
     connect = sqlite3.connect('./database.db')
+    if "email" not in body:
+        return {"error": "L'email utilisateur manquant."}
+
+    if "password" not in body:
+        return {"error": "Le mot de passe est manquant."}
+
+    if "tel" not in body:
+        return {"error": "Le telephone utilisateur est  manquant."}
+
+    if "nom" not in body:
+        return {"error": "Le nom est manquant."}
     
+    if "prenom" not in body:
+        return {"error": "Le prenom est manquant."}
+
+    if "paypal" not in body:
+        return {"error": "Le paypal est manquant."}
+
+    if "pseudo" not in body:
+        return {"error": "Le pseudo est manquant."}
+
+    password = hash_password(body["password"])
+
+    print(password)
+ 
     try:
-        sql = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
+        sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
                    VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) """
         data = json.loads(
             json.dumps(
                 {
-                    "pseudo": pseudo,
-                    "email": email,
-                    "tel": tel,
-                    "nom": nom,
-                    "prenom": prenom,
-                    "paypal": paypal,
-                    "password": password,
+                    "pseudo": body['pseudo'],
+                    "email": body['email'],
+                    "tel": body['tel'],
+                    "nom": body['nom'],
+                    "prenom": body['prenom'],
+                    "paypal": body['paypal'],
+                    "password": password
                 }
             )
         )
         cursor = connect.cursor()
         cursor.execute(sql_create_user, data)
-        id_user = cursor.lastrowid
         connect.commit()
+        id_user = cursor.lastrowid
+
+
+        return {    "id": id_user,
+                    "pseudo": body['pseudo'],
+                    "email": body['email'],
+                    "tel": body['tel'],
+                    "nom": body['nom'],
+                    "prenom": body['prenom'],
+                    "paypal": body['paypal'],
+                }
+
     except sqlite3.Error as er:
+        print(er)
         return {"error": "Les données ne sont pas complètes, veuillez réessayer"}
 
 
@@ -202,7 +235,7 @@ def buy_artwork(id_artwork):
 
 def hash_password(password):
     salt = os.urandom(32)
-    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000)
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000).hex()
 
 
 @app.route("/login", methods=["POST"])
