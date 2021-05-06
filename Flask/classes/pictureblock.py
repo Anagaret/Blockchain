@@ -13,7 +13,7 @@ class PictureBlock(Block):
     
     def picture_to_base64(self, filename):
         try:
-            with open(cwd + '/Flask/pictures/' + filename, 'rb') as picture_file:
+            with open(cwd + '/pictures/' + filename, 'rb') as picture_file:
                 encoded_picture = base64.b64encode(picture_file.read())
             return encoded_picture
         except:

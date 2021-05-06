@@ -117,7 +117,7 @@ def add_artwork(user_id):
         return {"error": "Le prix n'est pas present ."}
     try:
         price = float(price.replace(",", "."))
-        f.save(cwd + "/Flask/pictures/" + secure_filename(f.filename))
+        f.save(cwd + "/pictures/" + secure_filename(f.filename))
         try:
             sql_create_artwork = """ INSERT INTO artwork(price, filename)
                                 VALUES (:price, :filename) """

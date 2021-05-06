@@ -8,7 +8,7 @@ cwd = os.getcwd()
     
 def create_table(): 
     try:
-        with open(cwd + '/Flask/schema_table.sql', 'r') as sql_file:
+        with open(cwd + '/schema_table.sql', 'r') as sql_file:
             curseur.executescript(sql_file.read())
             connexion.commit()
             connexion.close()
