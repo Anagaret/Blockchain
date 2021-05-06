@@ -173,7 +173,7 @@ def get_block_by_id_user_owner(id_user_owner):
 
 
 @app.route("/user/<int:id_user_owner>/block/<int:id_block>", methods=["GET"])
-def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
+def get_block_by_id_user_owner(id_user_owner, id_block):
     connect = sqlite3.connect("./database.db")
     connect.row_factory = dict_factory
     try:
