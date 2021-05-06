@@ -1,0 +1,7 @@
+login N
+inscription N
+achat A
+galerie A
+filtre A
+creation de l'image N
+profil utilisateur N
