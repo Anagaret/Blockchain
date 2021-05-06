@@ -41,8 +41,6 @@ def add_user():
         return {"error": "Le pseudo est manquant."}
 
     password = hash_password(body["password"])
-
-    print(password)
  
     try:
         sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
