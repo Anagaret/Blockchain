@@ -1,5 +1,5 @@
 import flask
-from flask import redirect, url_for, request, jsonify, flash, render_template
+from flask import redirect, url_for, request, jsonify, flash, render_template, session
 import sqlite3
 import json
 from werkzeug.utils import secure_filename
@@ -19,40 +19,39 @@ app.config['SECRET_KEY'] = 'your secret key'
 
 @app.route("/user", methods=['GET', 'POST'])
 def add_user():
-    print(request.form)
     if request.method == 'POST':
-        body = request.form
+        form = request.form
         connect = sqlite3.connect('./database.db')
-        if "email" not in body:
+        if "email" not in form:
             flash("L'email utilisateur manquant.")
             return render_template('create_user.html')
 
-        if "password" not in body:
+        if "password" not in form:
             flash("Le mot de passe est manquant.")
             return render_template('create_user.html')
-        if "tel" not in body:
+        if "tel" not in form:
             flash("Le telephone utilisateur est  manquant.")
             return render_template('create_user.html')
-        if "nom" not in body:
+        if "nom" not in form:
             flash("Le nom est manquant.")
             return render_template('create_user.html')
-        if "prenom" not in body:
+        if "prenom" not in form:
             flash("Le prenom est manquant.")
             return render_template('create_user.html')
-        if "paypal" not in body:
+        if "paypal" not in form:
             flash("Le paypal est manquant.")
             return render_template('create_user.html')
-        if "pseudo" not in body:
+        if "pseudo" not in form:
             flash("Le pseudo est manquant.")
             return render_template('create_user.html')
-        if not re.search(r"\S+[@]\w+[.]+\w+",body['email']):
+        if not re.search(r"\S+[@]\w+[.]+\w+",form['email']):
             flash("L'email n'est pas au bon format")
             return render_template('create_user.html')
-        if not re.search(r"^[0][6-7]{1}[0-9]{8}$", body['tel']):
+        if not re.search(r"^[0][6-7]{1}[0-9]{8}$", form['tel']):
             flash("Le numéro n'est pas au bon format. Il doit etre un 06 ou 07.")
             return render_template('create_user.html')
 
-        password = hash_password(body["password"])
+        password = hash_password(form["password"])
     
         try:
             sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
@@ -60,12 +59,12 @@ def add_user():
             data = json.loads(
                 json.dumps(
                     {
-                        "pseudo": body['pseudo'],
-                        "email": body['email'],
-                        "tel": body['tel'],
-                        "nom": body['nom'],
-                        "prenom": body['prenom'],
-                        "paypal": body['paypal'],
+                        "pseudo": form['pseudo'],
+                        "email": form['email'],
+                        "tel": form['tel'],
+                        "nom": form['nom'],
+                        "prenom": form['prenom'],
+                        "paypal": form['paypal'],
                         "password": password
                     }
                 )
@@ -104,6 +103,14 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
+@app.route('/')
+def index():
+    if not session.get('token'):
+        print('pas logged donc ')
+        return render_template('login.html')
+    print('logged')
+
+    return render_template('index.html')
 
 @app.route("/user/<int:user_id>/artwork", methods=["POST"])
 def add_artwork(user_id):
@@ -242,35 +249,47 @@ def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
+    if request.method == "POST":
+        print('post login ')
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
 
-    body = request.get_json()
-    if "email" not in body:
-        flash("Please enter")
-        # return {"error": "L'email utilisateur manquant."}
+        form = request.form
 
-    if "password" not in body:
-        return {"error": "Le mot de passe est manquant."}
+        if "email" not in form:
+            flash("L'email utilisateur manquant.")
+            return index()
 
-    try:
-        cursor = connect.cursor()
-        user = cursor.execute(
-            """ select * from user where email = ? """, [body["email"]]
-        ).fetchone()
-        if not user:
-            return {"error": "Email non trouvé"}
-        if not bcrypt.checkpw(body['password'].encode("utf-8"), user["password"].encode("utf-8")):
-            return {"error": "Mot de passe incorrect"}
+        if "password" not in form:
+            flash("Le mot de passe est manquant.")
+            return index()
 
-        token = jwt.encode({'id': user["id"], "pseudo" : user["pseudo"]}, "123456789", algorithm="HS256")
-        return {"token": token}
 
-        return redirect("/artwork/" + str(id_artwork))
-    except sqlite3.Error as er:
-        return {"error": "Probleme base de donne ."}
+
+        try:
+            cursor = connect.cursor()
+            user = cursor.execute(
+                """ select * from user where email = ? """, [form["email"]]
+            ).fetchone()
+            if not user:
+                flash("Utilisateur non trouvé")
+                return index()
+            if not bcrypt.checkpw(form['password'].encode("utf-8"), user["password"].encode("utf-8")):
+                flash("Mot de passe incorrect")
+                return index()
+
+
+            token = jwt.encode({'id': user["id"]}, "123456789", algorithm="HS256")
+            session['token'] = token
+            session['user'] = user
+
+
+        except sqlite3.Error as er:
+            flash("Probleme base de donnée")
+        return index()
+    return index()
 
 
 @app.route("/user/<int:id_user_owner>/block", methods=["GET"])
@@ -325,9 +344,13 @@ def get_all_creator():
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
 
+@app.route("/logout")
+def logout():
+    session['token'] = None
+    session['user'] = None
+    return index()
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+
+
 
 app.run()
