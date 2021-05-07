@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Inscription{% endblock %}</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="title">Pseudo</label>
+        <input type="text" name="pseudo"
+               placeholder="xxxxxx" class="form-control"
+               value="{{ request.form['pseudo'] }}" 
+               required></input>
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" name="email"
+               placeholder="jean@gmail.com" class="form-control"
+               value="{{ request.form['email'] }}"
+               required></input>
+    </div>
+    <div class="form-group">
+        <label for="tel">Téléphone</label>
+        <input type="tel" name="tel"
+                pattern="[0][6-7]{1}[0-9]{8}"
+               placeholder="0712345678" class="form-control"
+               value="{{ request.form['tel'] }}"
+               required></input>
+    </div>
+    <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" name="nom"
+               placeholder="Dupond" class="form-control"
+               value="{{ request.form['nom'] }}"
+               required></input>
+    </div>
+    <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" name="prenom"
+               placeholder="Pierre" class="form-control"
+               value="{{ request.form['prenom'] }}"
+               required></input>
+    </div>
+    <div class="form-group">
+        <label for="prenom">Paypal</label>
+        <input type="text" name="paypal"
+               placeholder="XXXXXXXX" class="form-control"
+               value="{{ request.form['paypal'] }}"
+               required></input>
+    </div>
+    <div class="form-group">
+        <label for="prenom">Mot de passe</label>
+        <input type="password" name="password"
+               placeholder="------" class="form-control"
+               value="{{ request.form['password'] }}"
+               required></input>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">S'enregistrer</button>
+    </div>
+</form>
+{% endblock %}

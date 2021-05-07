@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Mes créations{% endblock %}</h1>
+{% if artworks  %}
+{% for artwork in artworks %}
+      <div class="card">
+        <img height=200 width=200 class="card-img-top" src="../../static/pictures/{{ artwork['filename'] }}" alt="Picture">
+        <div class="card-body">
+            <h5 class="card-title">{{ artwork['filename'] }}</h5>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Disponibilté : {% if artwork['available'] == 1 %} Oui {% else %}  Non {% endif %}
+            <li class="list-group-item">Acheteur actuel : {{ artwork['pseudo']}}
+            </li>
+          </ul>
+      </div>
+    {% endfor %}
+{% else %}
+<div class="alert alert-dark" role="alert">
+    Vous possédez aucune oeuvre. 
+</div>
+<a class="nav-link" href="{{url_for('add_artwork')}}">Déposer son œuvre
+</a>
+{% endif %}
+
+{% endblock %}

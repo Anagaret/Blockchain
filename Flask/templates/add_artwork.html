@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Déposer son œuvre {% endblock %}</h1>
+
+<form action="/artwork/new" method="post" enctype="multipart/form-data">
+    {% if filename %}
+    <div class="alert alert-primary" role="alert">
+        Votre œuvre a bien été ajouté !!
+      </div>
+    {% endif %}
+    <div class="form-group">
+        <label for="price">Prix : </label>
+        <input type="number" name="price" class="form-control" value="{{ request.form['price'] }}" required></input>
+    </div>
+    <div class="form-group">
+        <label for="picture">Votre œuvre:</label>
+        <input type="file" id="picture" name="picture" accept="image/*"
+        required></input>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Mettre en vente</button>
+    </div>
+</form>
+{% endblock %}

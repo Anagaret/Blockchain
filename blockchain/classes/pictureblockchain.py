@@ -13,7 +13,7 @@ class PictureBlockchain(Blockchain):
     
     def picture_to_base64(self, path):
         try:
-            with open(cwd +'/pictures/' + path, 'rb') as picture_file:
+            with open(cwd +'/static/pictures/' + path, 'rb') as picture_file:
                 encoded_picture = base64.b64encode(picture_file.read())
             return encoded_picture
         except:

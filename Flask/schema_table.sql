@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS "user"(
     nom TEXT NOT NULL,
     prenom TEXT NOT NULL,
     paypal TEXT UNIQUE NOT NULL,
-    "password" TEXT NOT NULL
+    "password" TEXT NOT NULL,
+    disabled INTEGER DEFAULT 0
 );
 DROP TABLE IF EXISTS artwork;
 CREATE table IF NOT EXISTS "artwork"(

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Mes œuvres{% endblock %}</h1>
+{% if artworks %}
+{% for artwork in artworks %}
+<div class="card">
+  <img height=200 width=200 class="card-img-top" src="../../static/pictures/{{ artwork['filename'] }}" alt="Picture">
+  <div class="card-body">
+    <h5 class="card-title">{{ artwork['filename'] }}</h5>
+    <div class="card-text" style="text-overflow: ellipsis; height: 200px;overflow: hidden; overflow: scroll">
+      {{ artwork['data'] }}</div>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">Index : {{ artwork['index']}}</li>
+    <li class="list-group-item">Nonce : {{ artwork['nonce'] }}</li>
+    <li class="list-group-item">Previous hash : {{ artwork['previous_hash'] }}</li>
+    <li class="list-group-item">Hash : {{ artwork['hash'] }}</li>
+    <li class="list-group-item">Timestamp : {{ artwork['timestamp'] }}</li>
+    <li class="list-group-item">Disponibilté : {% if artwork['available'] == 1 %} Oui {% else %} Non {% endif %}
+      <a class="nav-link" href="{{url_for('available_artwork', id_artwork=artwork.id_artwork , available=artwork.available)}}">Rendre {% if
+        artwork['available'] == 0 %} disponible {% else %} indisponible {% endif %}
+      </a>
+    </li>
+    <li class="list-group-item">Créateur : {{ artwork['pseudo']}}
+    </li>
+  </ul>
+</div>
+{% endfor %}
+{% else %}
+<div class="alert alert-dark" role="alert">
+  Vous possédez aucune oeuvre.
+</div>
+<a class="nav-link" href="{{url_for('add_artwork')}}">Déposer son œuvre
+</a>
+{% endif %}
+
+{% endblock %}

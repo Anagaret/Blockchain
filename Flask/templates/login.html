@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Connexion{% endblock %}</h1>
+
+<form action="/login" method="post">
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ request.form['email'] }}" required></input>
+    </div>
+    <div class="form-group">
+        <label for="prenom">Mot de passe</label>
+        <input type="password" name="password" class="form-control" value="{{ request.form['password'] }}"
+            required></input>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Se connecter</button>
+    </div>
+</form>
+{% endblock %}
