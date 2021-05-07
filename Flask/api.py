@@ -119,10 +119,9 @@ def index():
     try:
         cursor = connect.cursor()
         artworks = cursor.execute(
-            """ select id_user_creator, id_artwork, id_user_owner, filename,
-         price, available, pseudo from artwork a INNER JOIN block b ON a.id = b.id_artwork 
+            """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
          INNER JOIN user u ON b.id_user_creator = u.id 
-         WHERE b.id_user_creator <> ?""", [session.get('user')['id']]
+         WHERE b.id_user_creator <> ? and a.available = 1""", [session.get('user')['id']]
         ).fetchall()
         if artworks:
             artworks={"first": artworks[0], 'rest': artworks[1:]}
@@ -201,7 +200,7 @@ def add_artwork():
         return render_template('add_artwork.html')
 
 
-@app.route("/artwork/<int:id_artwork>/", methods=["GET"])
+@app.route("/artwork/<int:id_artwork>", methods=["GET"])
 def get_artwork(id_artwork):
     connect = sqlite3.connect("./database.db")
     connect.row_factory = dict_factory
@@ -256,30 +255,33 @@ def get_all_artwork_by_creator():
             return render_template('user_artworks.html')
 
 
-@app.route("/buy_artwork/<int:id_artwork>", methods=["PUT"])
+@app.route("/buy_artwork/<int:id_artwork>", methods=["GET"])
 def buy_artwork(id_artwork):
+    if not session.get('token'):
+        return index()
     connect = sqlite3.connect("./database.db")
     connect.row_factory = dict_factory
 
-    body = request.get_json()
-    if "id_user" not in body:
-        return {"error": "L'identifiant utilisateur pour l'achat est manquant."}
 
     try:
         cursor = connect.cursor()
         cursor.execute(
             """ UPDATE artwork SET available = 0 WHERE id = ?""", [id_artwork]
         )
+        connect.commit()
         cursor.execute(
             """ 
                 UPDATE block SET id_user_owner = ? WHERE id_artwork = ?""",
-            [body["id_user"], id_artwork],
+            [session.get('user')['id'], id_artwork],
         )
         connect.commit()
-
-        return redirect("/artwork/" + str(id_artwork))
+        
+        return get_all_artwork_by_creator()
     except sqlite3.Error as er:
-        return {"error": "Probleme base de donne ."}
+        print(er)
+        flash("Probleme base de donne .")
+        return index()
+
 
 
 def hash_password(password):

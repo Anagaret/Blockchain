@@ -11,6 +11,8 @@
                 <h5 style="color: black;">{{ artworks.first['filename'] }}</h5>
                 <h5 style="color: black;">Prix:  {{ artworks.first['price'] }} $</h5>
                 <h5 style="color: black;">Créateur:  {{ artworks.first['pseudo'] }}</h5>
+                <a  class="nav-link" href="{{url_for('buy_artwork', id_artwork=artworks.first.id_artwork) }}">Acheter
+                </a>
             </div>
         </div>
         {% for artwork in artworks.rest %}
@@ -20,6 +22,8 @@
                 <h5 style="color: black;">{{ artwork['filename'] }}</h5>
                 <h5 style="color: black;">Prix:  {{ artwork['price'] }} $</h5>
                 <h5 style="color: black;">Créateur:  {{ artwork['pseudo'] }}</h5>
+                <a  class="nav-link" href="{{url_for('buy_artwork', id_artwork=artwork.id_artwork )}}">Acheter
+                </a>
             </div>
           </div>
           {% endfor %}
