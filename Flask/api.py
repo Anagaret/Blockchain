@@ -439,11 +439,15 @@ def user_profil():
     try:
         cursor = connect.cursor()
         data = cursor.execute(
-            """ select count(DISTINCT(id)) as count  from block WHERE id_user_owner = ?""",
-            [session.get('user')['id']]
+            """ select (select count(DISTINCT(id))   from block WHERE id_user_owner = ?) as count_owner,
+                 (select count(DISTINCT(id))   from block WHERE id_user_creator = ?) as count_creator""",
+            [session.get('user')['id'], session.get('user')['id']]
         ).fetchone()
-        return render_template('user_profil.html', data={'count':data['count'], 'user': session.get('user')})
+
+        print(data)
+        return render_template('user_profil.html', data={'user': session.get('user'),'count_owner':data['count_owner'], 'count_creator':data['count_creator'], })
 
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
+        return user_profil()
 app.run()
