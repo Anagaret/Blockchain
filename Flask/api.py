@@ -123,6 +123,7 @@ def index():
          INNER JOIN user u ON b.id_user_creator = u.id 
          WHERE b.id_user_owner <> ? and a.available = 1""", [session.get('user')['id']]
         ).fetchall()
+        print(artworks[0].keys())
         if artworks:
             artworks={"first": artworks[0], 'rest': artworks[1:]}
     except sqlite3.Error as er:
@@ -299,6 +300,7 @@ def buy_artwork(id_artwork):
         
         return get_all_artwork_by_owner()
     except sqlite3.Error as er:
+        print(er)
         flash("Probleme base de donne .")
         return index()
 

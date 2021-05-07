@@ -8,10 +8,11 @@
         <div class="carousel-item active">
             <img class="d-block w-100" src="../../static/pictures/{{ artworks.first['filename'] }}" alt="{{ artworks.first['filename'] }}">
             <div class="carousel-caption d-none d-md-block">
-                <h5 style="color: black;">{{ artworks.first['filename'] }}</h5>
-                <h5 style="color: black;">Prix:  {{ artworks.first['price'] }} $</h5>
-                <h5 style="color: black;">Créateur:  {{ artworks.first['pseudo'] }}</h5>
-                <a  class="nav-link" href="{{url_for('buy_artwork', id_artwork=artworks.first.id_artwork) }}">Acheter
+                <h5 style="color: black; background-color: white">{{ artworks.first['filename'] }}</h5>
+                <h5 style="color: black; background-color: white">Prix:  {{ artworks.first['price'] }} $</h5>
+                <h5 style="color: black; background-color: white">Créateur:  {{ artworks.first['pseudo'] }}</h5>
+                <a class="nav-link" style="color: black; background-color: white"
+                href="{{url_for('buy_artwork', id_artwork=artworks.first.id_artwork) }}">Acheter
                 </a>
             </div>
         </div>
@@ -19,10 +20,11 @@
           <div class="carousel-item">
             <img class="d-block w-100" src="../../static/pictures/{{ artwork['filename'] }}" alt="{{ artwork['filename'] }}">
             <div class="carousel-caption d-none d-md-block">
-                <h5 style="color: black;">{{ artwork['filename'] }}</h5>
-                <h5 style="color: black;">Prix:  {{ artwork['price'] }} $</h5>
-                <h5 style="color: black;">Créateur:  {{ artwork['pseudo'] }}</h5>
-                <a  class="nav-link" href="{{url_for('buy_artwork', id_artwork=artwork.id_artwork )}}">Acheter
+                <h5 style="color: black; background-color: white">{{ artwork['filename'] }}</h5>
+                <h5 style="color: black; background-color: white">Prix:  {{ artwork['price'] }} $</h5>
+                <h5 style="color: black; background-color: white">Créateur:  {{ artwork['pseudo'] }}</h5>
+                <a  style="color: black; background-color: white"
+                class="nav-link" href="{{url_for('buy_artwork', id_artwork=artwork.id_artwork )}}">Acheter
                 </a>
             </div>
           </div>
