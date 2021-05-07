@@ -123,7 +123,6 @@ def index():
          INNER JOIN user u ON b.id_user_creator = u.id 
          WHERE b.id_user_owner <> ? and a.available = 1""", [session.get('user')['id']]
         ).fetchall()
-        print(artworks[0].keys())
         if artworks:
             artworks={"first": artworks[0], 'rest': artworks[1:]}
     except sqlite3.Error as er:
