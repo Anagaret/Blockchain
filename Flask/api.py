@@ -218,8 +218,8 @@ def get_artwork(id_artwork):
 def get_all_artwork():
    
     try:
-        cursor = connect.cursor()
         connect = sqlite3.connect("./database.db")
+        cursor = connect.cursor()
         connect.row_factory = dict_factory
         artworks = cursor.execute(
             """ select b.id_user_creator, b.id_artwork, b.id_user_owner, a.filename,
