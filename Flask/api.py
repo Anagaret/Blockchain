@@ -233,7 +233,29 @@ def get_all_artwork():
         return {"error": "Probleme base de donne ."}
 
 
-@app.route("/user/artwork", methods=["GET"])
+@app.route("/user/artwork/owner", methods=["GET"])
+def get_all_artwork_by_owner():
+    if not session.get('token'):
+        return render_template('login.html')
+    else:
+        id_user_owner = session.get('user')['id']
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
+        try:
+            cursor = connect.cursor()
+            artworks = cursor.execute(
+                """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
+                INNER JOIN user u ON u.id = b.id_user_creator
+            WHERE b.id_user_owner = ? """,
+                [id_user_owner],
+            ).fetchall()
+            return render_template('user_artwork_owner.html', artworks=artworks)
+        except sqlite3.Error as er:
+            flash("Probleme base de donne .")
+            return render_template('user_artwork_owner.html')
+
+
+@app.route("/user/artwork/creator", methods=["GET"])
 def get_all_artwork_by_creator():
     if not session.get('token'):
         return render_template('login.html')
@@ -245,15 +267,14 @@ def get_all_artwork_by_creator():
             cursor = connect.cursor()
             artworks = cursor.execute(
                 """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
-                INNER JOIN user u ON u.id = b.id_user_creator
-            WHERE b.id_user_owner = ? """,
+                INNER JOIN user u ON u.id = b.id_user_owner
+                WHERE b.id_user_creator = ? """,
                 [id_user_creator],
             ).fetchall()
-            return render_template('user_artworks.html', artworks=artworks)
+            return render_template('user_artwork_creator.html', artworks=artworks)
         except sqlite3.Error as er:
             flash("Probleme base de donne .")
-            return render_template('user_artworks.html')
-
+            return render_template('user_artwork_creator.html')
 
 @app.route("/buy_artwork/<int:id_artwork>", methods=["GET"])
 def buy_artwork(id_artwork):
