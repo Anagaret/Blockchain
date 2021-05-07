@@ -21,7 +21,6 @@ app.config['SECRET_KEY'] = 'your secret key'
 def add_user():
     if request.method == 'POST':
         form = request.form
-        connect = sqlite3.connect('./database.db')
         if "email" not in form:
             flash("L'email utilisateur manquant.")
             return render_template('create_user.html')
@@ -53,6 +52,7 @@ def add_user():
         password = hash_password(form["password"])
     
         try:
+            connect = sqlite3.connect('./database.db')
             sql_create_user = """INSERT INTO user(pseudo, email, tel, nom, prenom, paypal, password)
                     VALUES(:pseudo, :email, :tel, :nom, :prenom, :paypal, :password) """
             data = json.loads(
@@ -76,7 +76,7 @@ def add_user():
 
             return index()
 
-
+            connect.close()
         except sqlite3.Error as er:
             flash("Doublon d'information")
             return render_template('create_user.html')
@@ -85,18 +85,17 @@ def add_user():
 
 @app.route("/delete_user", methods=["GET"])
 def delete_user():
-    print('on oasse ici')
-
     if not session.get('token'):
         return login()
     else:
-        connect = sqlite3.connect("./database.db")
         user_id = session.get('user')['id']
         try:
+            connect = sqlite3.connect("./database.db")
             sql = """  UPDATE user SET disabled = ? WHERE id = ? """
             cursor = connect.cursor()
             cursor.execute(sql, [1,user_id])
             connect.commit()
+            connect.close()
             return logout()
         except sqlite3.Error as er:
             print(er)
@@ -114,9 +113,10 @@ def dict_factory(cursor, row):
 def index():
     if not session.get('token'):
         return render_template('login.html')
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
+
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         artworks = cursor.execute(
             """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
@@ -125,6 +125,7 @@ def index():
         ).fetchall()
         if artworks:
             artworks={"first": artworks[0], 'rest': artworks[1:]}
+        connect.close()
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
         return index();
@@ -133,7 +134,6 @@ def index():
 @app.route("/artwork/new", methods=["GET","POST"])
 def add_artwork():
     if request.method == "POST":
-        connect = sqlite3.connect("./database.db")
         if 'picture' not in request.files:
             flash("Aucun fichier")
             return redirect(request.url)
@@ -141,14 +141,9 @@ def add_artwork():
         if f.filename == '':
             flash('Aucune fichier selectionné')
             return redirect(request.url)
-        print(type(f.mimetype))
-        print(f.mimetype)
-
         if "image" not in f.mimetype:
             flash("Le fichier transmit n'est pas une image .")
             return render_template('add_artwork.html')
-
-
         price = request.form.get("price", None)
         if price is None:
             flash("Le prix n'est pas present .")
@@ -157,6 +152,7 @@ def add_artwork():
             price = float(price.replace(",", "."))
             f.save(cwd + "/static/pictures/" + secure_filename(f.filename))
             try:
+                connect = sqlite3.connect("./database.db")
                 user_id = session.get('user')['id']
                 sql_create_artwork = """ INSERT INTO artwork(price, filename)
                                     VALUES (:price, :filename) """
@@ -183,8 +179,7 @@ def add_artwork():
                 json.loads(json.dumps(data_block))
                 cursor.execute(sql_create_block, json.loads(json.dumps(data_block)))
                 connect.commit()
-
-
+                connect.close()
             except sqlite3.Error as er:
                 flash("Probleme insertion artwork")
                 return render_template('add_artwork.html')
@@ -202,9 +197,9 @@ def add_artwork():
 
 @app.route("/artwork/<int:id_artwork>", methods=["GET"])
 def get_artwork(id_artwork):
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         artwork = cursor.execute(
             """ select b.id_user_creator, b.id_artwork, b.id_user_owner, a.filename,
@@ -213,6 +208,7 @@ def get_artwork(id_artwork):
         ).fetchone()
         if not artwork:
             artwork = {}
+        connect.close()
         return jsonify(artwork)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -220,14 +216,16 @@ def get_artwork(id_artwork):
 
 @app.route("/artwork", methods=["GET"])
 def get_all_artwork():
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
+   
     try:
         cursor = connect.cursor()
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         artworks = cursor.execute(
             """ select b.id_user_creator, b.id_artwork, b.id_user_owner, a.filename,
          a.price, a.available from artwork a INNER JOIN block b ON a.id = b.id_artwork """
         ).fetchall()
+        connect.close()
         return jsonify(artworks)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -239,9 +237,9 @@ def get_all_artwork_by_owner():
         return render_template('login.html')
     else:
         id_user_owner = session.get('user')['id']
-        connect = sqlite3.connect("./database.db")
-        connect.row_factory = dict_factory
         try:
+            connect = sqlite3.connect("./database.db")
+            connect.row_factory = dict_factory
             cursor = connect.cursor()
             artworks = cursor.execute(
                 """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
@@ -249,6 +247,7 @@ def get_all_artwork_by_owner():
             WHERE b.id_user_owner = ? """,
                 [id_user_owner],
             ).fetchall()
+            connect.close()
             return render_template('user_artwork_owner.html', artworks=artworks)
         except sqlite3.Error as er:
             flash("Probleme base de donne .")
@@ -261,9 +260,9 @@ def get_all_artwork_by_creator():
         return render_template('login.html')
     else:
         id_user_creator = session.get('user')['id']
-        connect = sqlite3.connect("./database.db")
-        connect.row_factory = dict_factory
         try:
+            connect = sqlite3.connect("./database.db")
+            connect.row_factory = dict_factory
             cursor = connect.cursor()
             artworks = cursor.execute(
                 """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
@@ -271,6 +270,7 @@ def get_all_artwork_by_creator():
                 WHERE b.id_user_creator = ? """,
                 [id_user_creator],
             ).fetchall()
+            connect.close()
             return render_template('user_artwork_creator.html', artworks=artworks)
         except sqlite3.Error as er:
             flash("Probleme base de donne .")
@@ -280,11 +280,9 @@ def get_all_artwork_by_creator():
 def buy_artwork(id_artwork):
     if not session.get('token'):
         return index()
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
-
-
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         cursor.execute(
             """ UPDATE artwork SET available = 0 WHERE id = ?""", [id_artwork]
@@ -296,10 +294,9 @@ def buy_artwork(id_artwork):
             [session.get('user')['id'], id_artwork],
         )
         connect.commit()
-        
+        connect.close()
         return get_all_artwork_by_owner()
     except sqlite3.Error as er:
-        print(er)
         flash("Probleme base de donne .")
         return index()
 
@@ -311,16 +308,16 @@ def available_artwork(id_artwork,available):
         available = 0
     if not session.get('token'):
         return index()
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
-
-
+   
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         cursor.execute(
             """ UPDATE artwork SET available = ? WHERE id = ?""", [available, id_artwork]
         )
         connect.commit()
+        connect.close()
         return get_all_artwork_by_owner()
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
@@ -335,9 +332,7 @@ def hash_password(password):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        connect = sqlite3.connect("./database.db")
-        connect.row_factory = dict_factory
-
+        
         form = request.form
 
         if "email" not in form:
@@ -351,6 +346,8 @@ def login():
 
 
         try:
+            connect = sqlite3.connect("./database.db")
+            connect.row_factory = dict_factory
             cursor = connect.cursor()
             user = cursor.execute(
                 """ select * from user where email = ?  and disabled = 0""", [form["email"]]
@@ -370,15 +367,17 @@ def login():
 
         except sqlite3.Error as er:
             flash("Probleme base de donnée")
+        connect.close()
         return index()
     return index()
 
 
 @app.route("/user/<int:id_user_owner>/block", methods=["GET"])
 def get_block_by_id_user_owner(id_user_owner):
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
+    
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         blocks = cursor.execute(
             """ select "index", previous_hash, data, "timestamp", hash, nonce from block
@@ -387,6 +386,7 @@ def get_block_by_id_user_owner(id_user_owner):
         ).fetchall()
         if not blocks:
             blocks = []
+        connect.close()
         return jsonify(blocks)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -394,9 +394,10 @@ def get_block_by_id_user_owner(id_user_owner):
 
 @app.route("/user/<int:id_user_owner>/block/<int:id_block>", methods=["GET"])
 def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
+   
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         block = cursor.execute(
             """ select "index", previous_hash, data, "timestamp", hash, nonce from block
@@ -405,6 +406,7 @@ def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
         ).fetchone()
         if not block:
             block = {}
+        connect.close()
         return jsonify(block)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -412,9 +414,9 @@ def get_block_by_id_user_owner_and_id_block(id_user_owner, id_block):
 
 @app.route("/creator", methods=["GET"])
 def get_all_creator():
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         creators = cursor.execute(
             """ select DISTINCT (b.id_user_owner), pseudo from block b INNER JOIN user u  
@@ -422,6 +424,7 @@ def get_all_creator():
         ).fetchall()
         if not creators:
             creators = []
+        connect.close()
         return jsonify(creators)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -435,19 +438,17 @@ def logout():
 
 @app.route("/user_profil", methods=["GET"])
 def user_profil():
-    connect = sqlite3.connect("./database.db")
-    connect.row_factory = dict_factory
     try:
+        connect = sqlite3.connect("./database.db")
+        connect.row_factory = dict_factory
         cursor = connect.cursor()
         data = cursor.execute(
             """ select (select count(DISTINCT(id))   from block WHERE id_user_owner = ?) as count_owner,
                  (select count(DISTINCT(id))   from block WHERE id_user_creator = ?) as count_creator""",
             [session.get('user')['id'], session.get('user')['id']]
         ).fetchone()
-
-        print(data)
+        connect.close()
         return render_template('user_profil.html', data={'user': session.get('user'),'count_owner':data['count_owner'], 'count_creator':data['count_creator'], })
-
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
         return user_profil()
