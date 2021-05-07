@@ -114,7 +114,22 @@ def dict_factory(cursor, row):
 def index():
     if not session.get('token'):
         return render_template('login.html')
-    return render_template('index.html')
+    connect = sqlite3.connect("./database.db")
+    connect.row_factory = dict_factory
+    try:
+        cursor = connect.cursor()
+        artworks = cursor.execute(
+            """ select id_user_creator, id_artwork, id_user_owner, filename,
+         price, available, pseudo from artwork a INNER JOIN block b ON a.id = b.id_artwork 
+         INNER JOIN user u ON b.id_user_creator = u.id 
+         WHERE b.id_user_creator <> ?""", [session.get('user')['id']]
+        ).fetchall()
+        if artworks:
+            artworks={"first": artworks[0], 'rest': artworks[1:]}
+    except sqlite3.Error as er:
+        flash("Probleme base de donne .")
+        return index();
+    return render_template('index.html', artworks=artworks)
 
 @app.route("/artwork/new", methods=["GET","POST"])
 def add_artwork():
@@ -214,8 +229,6 @@ def get_all_artwork():
             """ select b.id_user_creator, b.id_artwork, b.id_user_owner, a.filename,
          a.price, a.available from artwork a INNER JOIN block b ON a.id = b.id_artwork """
         ).fetchall()
-        if not artworks:
-            artworks = []
         return jsonify(artworks)
     except sqlite3.Error as er:
         return {"error": "Probleme base de donne ."}
@@ -388,10 +401,4 @@ def user_profil():
 
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
-
-
-
-
-
-
 app.run()
