@@ -452,4 +452,10 @@ def user_profil():
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
         return user_profil()
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "<h1>Erreur</h1><p>Page non trouvé !!!</p>", 404
+
 app.run()
