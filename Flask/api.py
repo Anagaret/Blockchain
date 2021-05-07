@@ -287,21 +287,40 @@ def buy_artwork(id_artwork):
     try:
         cursor = connect.cursor()
         cursor.execute(
-            """ UPDATE artwork SET available = 0 WHERE id = ?""", [id_artwork]
-        )
-        connect.commit()
-        cursor.execute(
-            """ 
-                UPDATE block SET id_user_owner = ? WHERE id_artwork = ?""",
-            [session.get('user')['id'], id_artwork],
+            """ UPDATE artwork SET available = 1 WHERE id = ?""", [id_artwork]
         )
         connect.commit()
         
-        return get_all_artwork_by_creator()
+        return get_all_artwork_by_owner()
     except sqlite3.Error as er:
-        print(er)
+        flash("Probleme base de donne .")
+        return get_all_artwork_by_owner()
+
+
+
+@app.route("/available_artwork/<int:id_artwork>/<int:available>", methods=["GET"])
+def available_artwork(id_artwork,available):
+    if available == 0:
+        available = 1
+    else:
+        available = 0
+    if not session.get('token'):
+        return index()
+    connect = sqlite3.connect("./database.db")
+    connect.row_factory = dict_factory
+
+
+    try:
+        cursor = connect.cursor()
+        cursor.execute(
+            """ UPDATE artwork SET available = ? WHERE id = ?""", [available, id_artwork]
+        )
+        connect.commit()
+        return get_all_artwork_by_owner()
+    except sqlite3.Error as er:
         flash("Probleme base de donne .")
         return index()
+
 
 
 
