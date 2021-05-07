@@ -121,7 +121,7 @@ def index():
         artworks = cursor.execute(
             """ select * from artwork a INNER JOIN block b ON a.id = b.id_artwork 
          INNER JOIN user u ON b.id_user_creator = u.id 
-         WHERE b.id_user_creator <> ? and a.available = 1""", [session.get('user')['id']]
+         WHERE b.id_user_owner <> ? and a.available = 1""", [session.get('user')['id']]
         ).fetchall()
         if artworks:
             artworks={"first": artworks[0], 'rest': artworks[1:]}
@@ -287,16 +287,20 @@ def buy_artwork(id_artwork):
     try:
         cursor = connect.cursor()
         cursor.execute(
-            """ UPDATE artwork SET available = 1 WHERE id = ?""", [id_artwork]
+            """ UPDATE artwork SET available = 0 WHERE id = ?""", [id_artwork]
+        )
+        connect.commit()
+        cursor.execute(
+            """ 
+                UPDATE block SET id_user_owner = ? WHERE id_artwork = ?""",
+            [session.get('user')['id'], id_artwork],
         )
         connect.commit()
         
         return get_all_artwork_by_owner()
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
-        return get_all_artwork_by_owner()
-
-
+        return index()
 
 @app.route("/available_artwork/<int:id_artwork>/<int:available>", methods=["GET"])
 def available_artwork(id_artwork,available):
@@ -320,7 +324,6 @@ def available_artwork(id_artwork,available):
     except sqlite3.Error as er:
         flash("Probleme base de donne .")
         return index()
-
 
 
 
